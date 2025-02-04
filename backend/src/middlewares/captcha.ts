@@ -1,7 +1,5 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { prisma } from "../init/prisma";
 import { pino } from "../init/pino";
-import { jwt } from "../init/jwt";
 import axios from "axios";
 
 export async function captchaPreHandler(
