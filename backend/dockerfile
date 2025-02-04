@@ -5,8 +5,8 @@ FROM node:latest
 WORKDIR /app
 
 # Install nmap
-RUN apt update
-RUN apt install nmap
+RUN apt update -y
+RUN apt install nmap -y
 
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
 COPY package*.json ./
