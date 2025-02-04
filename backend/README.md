@@ -1,35 +1,31 @@
-# Immuta Serverside backend
-
-Hey! Welcome to the Immuta SS Backend!
-Written by lenny.
+# PortScan-X backend
 
 This project uses pnpm.
 
-# Setup
 
-To set this backend up, you will need to create a postgres database, copy the .env and fill it with data.
+## Installing dependencies
 
-Database_url is the url of the postgres db.\
-JWT_secret_key can be anything that you want (use a online password generator or press random keys)\
-JWT_issuer can be anything\
-
-# .env
-
-```.env
-DATABASE_URL=
-JWT_SECRET_KEY=
-JWT_ISSUER=
-logwebhookURL=
+```sh
+npm i -g pnpm tsx typescript # Make sure node.js is installed
+pnpm i
 ```
 
-# Installing dependencies
+## Building
 
-To install all dependencies, run `pnpm add`
+```sh
+pnpm build
+```
 
-# Building
+## Starting
 
-To build, run `pnpm build`
+```sh
+pnpm start
+```
 
-# Starting
+## Development
 
-To start, run `pnpm start`
+This enables live refresh:
+
+```sh
+pnpm dev
+```
