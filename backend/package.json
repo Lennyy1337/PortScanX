@@ -1,0 +1,36 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./build/index.js",
+  "scripts": {
+    "start": "node ./build/index.js",
+    "build": "tsc && npx prisma generate",
+    "dev": "npx tsx --watch ./src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@fastify/rate-limit": "^9.1.0",
+    "@marsidev/react-turnstile": "^1.1.0",
+    "@types/xml2json": "^0.11.6",
+    "axios": "^1.6.8",
+    "dotenv": "^16.4.5",
+    "fastify": "^4.26.2",
+    "fastify-yup-schema": "^1.0.4",
+    "node-sudo-nmap": "^4.0.4",
+    "pino": "^8.21.0",
+    "stnw": "^1.0.10",
+    "xml2json": "^0.12.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "pino-pretty": "^11.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "node-expat"
+    ]
+  }
+}
