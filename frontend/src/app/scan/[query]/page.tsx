@@ -26,7 +26,7 @@ async function scanTarget(target: string) {
     },
     body: JSON.stringify({ target }),
   });
-  if (!response.ok) throw new Error("Network response was not ok");
+  if (!response.ok) throw new Error("Network error when scanning target.");
   return response.json();
 }
 
@@ -51,31 +51,31 @@ export default function ScanPage() {
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1, rotate: 360 }}
-          transition={{ 
-            duration: 1, 
+          transition={{
+            duration: 1,
             ease: "linear",
             rotate: {
               duration: 1.5,
               repeat: Infinity,
-              ease: "linear"
-            }
+              ease: "linear",
+            },
           }}
           className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full relative"
         >
           <motion.div
-            animate={{ 
+            animate={{
               scale: [1, 1.2, 1],
-              opacity: [0.5, 1, 0.5]
+              opacity: [0.5, 1, 0.5],
             }}
             transition={{
               duration: 1.5,
               repeat: Infinity,
-              ease: "easeInOut"
+              ease: "easeInOut",
             }}
             className="absolute inset-0 border-4 border-purple-500 border-t-transparent rounded-full"
           />
         </motion.div>
-        
+
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -95,7 +95,7 @@ export default function ScanPage() {
       </div>
     );
   }
-  
+
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-white flex items-center justify-center">
@@ -105,25 +105,25 @@ export default function ScanPage() {
           className="text-center flex flex-col items-center bg-gray-900/50 p-8 rounded-2xl border border-gray-800 backdrop-blur-sm"
         >
           <motion.div
-            animate={{ 
+            animate={{
               scale: [1, 1.1, 1],
-              rotate: [0, 10, -10, 0]
+              rotate: [0, 10, -10, 0],
             }}
-            transition={{ 
+            transition={{
               duration: 1.5,
-              repeatDelay: 1
+              repeatDelay: 1,
             }}
           >
             <BiSolidError className="w-20 h-20 mb-4 text-red-400/80" />
           </motion.div>
-          
+
           <h1 className="text-3xl font-bold mb-4 bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">
             Scan Failed
           </h1>
           <p className="text-gray-400 mb-6 max-w-md">
             {(error as Error).message}
           </p>
-          
+
           <motion.button
             onClick={() => router.push("/")}
             whileHover={{ scale: 1.05 }}
@@ -139,10 +139,11 @@ export default function ScanPage() {
   }
 
   const scanData = data?.data;
-  const openPorts =
-    scanData?.host?.ports?.port?.filter(
-      (port: any) => port.state.state === "open"
-    ) || [];
+  const openPorts = Array.isArray(scanData?.host?.ports?.port)
+    ? scanData.host.ports.port.filter(
+        (port: any) => port?.state?.state === "open"
+      )
+    : [];
 
   const totalPages = Math.ceil(openPorts.length / itemsPerPage);
   const currentPorts = openPorts.slice(
@@ -150,9 +151,14 @@ export default function ScanPage() {
     currentPage * itemsPerPage
   );
 
-  const osGuess = scanData?.host?.os?.osmatch?.sort(
-    (a: any, b: any) => b.accuracy - a.accuracy
-  )[0];
+  const osMatches = Array.isArray(scanData?.host?.os?.osmatch)
+    ? scanData.host.os.osmatch
+    : [];
+
+  const osGuess =
+    osMatches.length > 0
+      ? osMatches.sort((a: any, b: any) => b.accuracy - a.accuracy)[0]
+      : null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
