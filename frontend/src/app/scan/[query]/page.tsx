@@ -191,19 +191,19 @@ export default function ScanPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           <InfoCard
             title="Status"
-            value={scanData?.host?.status?.state.toUpperCase()}
+            value={scanData?.host?.status?.state.toUpperCase() as string| "Unkown"}
             gradient="from-blue-500 to-blue-600"
             icon={<FaInfoCircle className="w-5 h-5" />}
           />
           <InfoCard
             title="IP Address"
-            value={scanData?.host?.address?.addr}
+            value={scanData?.host?.address?.addr as string| "Unknown"}
             gradient="from-purple-500 to-purple-600"
             icon={<FaGlobe className="w-5 h-5" />}
           />
           <InfoCard
             title="IP Family"
-            value={scanData?.host?.address?.addrtype?.toUpperCase()}
+            value={scanData?.host?.address?.addrtype?.toUpperCase() as string | "Unkown"}
             gradient="from-pink-500 to-pink-600"
             icon={<FaNetworkWired className="w-5 h-5" />}
           />
@@ -216,13 +216,13 @@ export default function ScanPage() {
           />
           <InfoCard
             title="Hostname"
-            value={scanData?.host?.hostnames?.hostname[0]?.name}
+            value={scanData?.host?.hostnames?.hostname[0]?.name as string | "N/A"}
             gradient="from-teal-500 to-teal-600"
             icon={<FaPortrait className="w-5 h-5" />}
           />
           <InfoCard
             title="Scan Duration"
-            value={`${scanData?.runstats?.finished?.elapsed}s`}
+            value={`${scanData?.runstats?.finished?.elapsed}s` as string| "N/A"}
             gradient="from-orange-500 to-orange-600"
             icon={<FaClock className="w-5 h-5" />}
           />

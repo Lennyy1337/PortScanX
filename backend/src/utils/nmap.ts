@@ -39,26 +39,36 @@ class NmapScanner extends EventEmitter {
 
   private buildArguments(options: ScanOptions): string[] {
     const args: string[] = [];
+  
+    args.push('-n', '-Pn', '-T4', '--min-parallelism', '100', '--max-retries', '1', '--max-rtt-timeout', '250ms', '--min-rate', '5000');
 
-    if (options.ports) {
-      args.push('-p', options.ports);
-    }
+    args.push('-sS', '-sU');
 
+    args.push('--top-ports', '1000');
+  
     if (options.osDetection) {
       args.push('-O');
     }
-
+  
+    if (options.serviceDetection) {
+      args.push('-sV');
+    }
+  
+    if (options.ports) {
+      args.push('-p', options.ports);
+    }
+  
     if (options.script) {
       args.push(`--script=${options.script}`);
     }
-
+  
     args.push('-oX', '-');
-
+  
     const targets = Array.isArray(options.target) 
       ? options.target.join(' ') 
       : options.target;
     args.push(targets);
-
+  
     return args;
   }
 
