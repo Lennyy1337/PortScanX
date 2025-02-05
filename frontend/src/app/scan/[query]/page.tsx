@@ -15,8 +15,10 @@ import {
   FaInfoCircle,
   FaPortrait,
   FaPlug,
+  FaCloudflare,
 } from "react-icons/fa";
 import { BiSolidError } from "react-icons/bi";
+import { FiExternalLink } from "react-icons/fi";
 
 async function scanTarget(target: string) {
   const response = await fetch("/api/v1/scan", {
@@ -42,6 +44,8 @@ export default function ScanPage() {
     queryFn: () => scanTarget(target),
     retry: false,
     refetchIntervalInBackground: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
     refetchInterval: 9999999,
   });
 
@@ -138,7 +142,8 @@ export default function ScanPage() {
     );
   }
 
-  const scanData = data?.data;
+  const scanData = data?.data.data;
+  const isCloudflare = data.data.cloudflare;
   const openPorts = Array.isArray(scanData?.host?.ports?.port)
     ? scanData.host.ports.port.filter(
         (port: any) => port?.state?.state === "open"
@@ -238,6 +243,7 @@ export default function ScanPage() {
             gradient="from-orange-500 to-orange-600"
             icon={<FaClock className="w-5 h-5" />}
           />
+          {isCloudflare ? <CloudflareInfoCard target={scanData?.host?.hostnames?.hostname?.name} /> : <></>}
         </div>
 
         <motion.div
@@ -308,55 +314,98 @@ export default function ScanPage() {
       </div>
     </div>
   );
-}
 
-function InfoCard({
-  title,
-  value,
-  subvalue,
-  gradient,
-  icon,
-}: {
-  title: string;
-  value: string;
-  subvalue?: string;
-  gradient: string;
-  icon: React.ReactNode;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className={`bg-gradient-to-br ${gradient} p-5 rounded-xl shadow-lg`}
-    >
-      <div className="flex items-center gap-3 mb-2">
-        {icon}
-        <h3 className="text-sm text-gray-200">{title}</h3>
-      </div>
-      <p className="text-xl font-semibold mb-1">{value || "N/A"}</p>
-      {subvalue && <p className="text-xs text-gray-300">{subvalue}</p>}
-    </motion.div>
-  );
-}
+  function InfoCard({
+    title,
+    value,
+    subvalue,
+    gradient,
+    icon,
+  }: {
+    title: string;
+    value: string;
+    subvalue?: string;
+    gradient: string;
+    icon: React.ReactNode;
+  }) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className={`bg-gradient-to-br ${gradient} p-5 rounded-xl shadow-lg relative`}
+      >
+        <div className="flex items-center justify-between gap-3 mb-2">
+          <div className="flex items-center gap-3">
+            {icon}
+            <h3 className="text-sm text-gray-200">{title}</h3>
+          </div>
+        </div>
+        <p className="text-xl font-semibold mb-1">{value || "N/A"}</p>
+        {subvalue && <p className="text-xs text-gray-300">{subvalue}</p>}
+      </motion.div>
+    );
+  }
+  function PortCard({ port, index }: { port: any; index: number }) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: index * 0.1 }}
+        className="bg-gray-800 p-4 rounded-lg hover:bg-gray-750 transition-colors"
+      >
+        <div className="flex items-center gap-2 mb-2">
+          <FaPlug className="text-blue-400" />
+          <span className="text-blue-400 font-mono">Port {port.portid}</span>
+          <span className="text-sm text-green-400 ml-auto">Open</span>
+        </div>
+        <div className="text-sm text-gray-300">
+          <p>Protocol: {port.protocol}</p>
+          <p>Service: {port.service?.name || "Unknown"}</p>
+        </div>
+      </motion.div>
+    );
+  }
+  function CloudflareInfoCard({ target }: { target: string }) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-gradient-to-br from-orange-400 col-span-full via-orange-500 to-orange-600 py-5 pl-5 rounded-xl shadow-lg relative overflow-hidden"
+      >
+        <div className="flex items-center justify-between gap-3 mb-2 relative">
+          <div className="flex items-center gap-3 z-10">
+            <FaCloudflare className="w-8 h-8" />
+            <h3 className="text-sm text-gray-200">DDoS Protection</h3>
+          </div>
 
-// Updated PortCard with icons
-function PortCard({ port, index }: { port: any; index: number }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1 }}
-      className="bg-gray-800 p-4 rounded-lg hover:bg-gray-750 transition-colors"
-    >
-      <div className="flex items-center gap-2 mb-2">
-        <FaPlug className="text-blue-400" />
-        <span className="text-blue-400 font-mono">Port {port.portid}</span>
-        <span className="text-sm text-green-400 ml-auto">Open</span>
-      </div>
-      <div className="text-sm text-gray-300">
-        <p>Protocol: {port.protocol}</p>
-        <p>Service: {port.service?.name || "Unknown"}</p>
-      </div>
-    </motion.div>
-  );
+          <motion.button
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+            onClick={() =>
+              window.open(
+                `https://search.censys.io/search?resource=hosts&sort=RELEVANCE&per_page=25&virtual_hosts=INCLUDE&q=${encodeURIComponent(
+                  target
+                )}`,
+                "_blank"
+              )
+            }
+            className="absolute inset-0 w-full h-full flex items-center justify-end px-4 bg-gradient-to-l from-orange-500/20 to-transparent"
+          >
+            <motion.span
+              whileHover={{ scale: 1.05 }}
+              className="px-4 py-2 text-sm font-medium text-orange-100 bg-orange-500/30 rounded-lg border border-orange-200/50 backdrop-blur-sm flex items-center gap-2"
+            >
+              Search Censys
+              <FiExternalLink className="text-sm" />
+            </motion.span>
+          </motion.button>
+        </div>
+        <p className="text-xl font-semibold mb-1 z-10 relative">Cloudflare</p>
+        <p className="text-xs text-gray-300 z-10 relative">
+          Detection via cf-ray header
+        </p>
+      </motion.div>
+    );
+  }
 }
