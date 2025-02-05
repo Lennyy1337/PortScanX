@@ -5,7 +5,7 @@ const nextConfig = {
     return [
       {
         source: "/api/:path*",
-        destination: "http://localhost:3001/:path*", //https://psxapi.lennyy1337.dev/:path*
+        destination: "http://localhost:3001/:path*",
       }
     ];
   },

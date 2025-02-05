@@ -5,6 +5,7 @@ import { fastifyYupSchema } from "fastify-yup-schema"
 import { fastify } from "./init/fastify"
 import { router } from "./router"
 import { pino } from "./init/pino"
+import axios, { Axios, AxiosError } from "axios"
 
 
 dotenv.config()
@@ -24,9 +25,9 @@ fastify.register(ratelimit, {
     })
   })
 
+
 fastify.listen({ port: 3001, host: "0.0.0.0" }, async function (err, address) {
     pino.info("Listening on " + address)
-
     if (err) {
         console.log(err)
         fastify.log.error(err)
