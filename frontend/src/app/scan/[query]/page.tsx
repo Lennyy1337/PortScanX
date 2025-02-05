@@ -222,7 +222,11 @@ export default function ScanPage() {
           />
           <InfoCard
             title="Hostname"
-            value={scanData?.host?.hostnames?.hostname?.name ? scanData?.host?.hostnames?.hostname?.name : "N/A"}
+            value={
+              scanData?.hosthint?.hostnames?.hostname?.name ||
+              scanData?.host?.hostnames?.hostname?.name ||
+              "N/A"
+            }
             gradient="from-teal-500 to-teal-600"
             icon={<FaPortrait className="w-5 h-5" />}
           />
