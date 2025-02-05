@@ -40,7 +40,7 @@ class NmapScanner extends EventEmitter {
   private buildArguments(options: ScanOptions): string[] {
     const args: string[] = [];
   
-    args.push('-n', '-Pn', '-T4', '--min-parallelism', '100', '--max-retries', '1', '--max-rtt-timeout', '250ms', '--min-rate', '5000');
+    args.push('-T4', '--min-parallelism', '100', '--max-retries', '2', '--max-rtt-timeout', '500ms', '--min-rate', '5000');
 
     args.push('-sS', '-sU');
 
