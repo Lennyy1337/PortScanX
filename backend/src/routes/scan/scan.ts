@@ -3,10 +3,17 @@ import { pino } from "../../init/pino"
 import dns from "node:dns"
 import NmapScanner from "../../utils/nmap"
 import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile"
-import axios from "axios"
+import axios, { AxiosResponse } from "axios"
 
 type body = {
     target: string
+}
+interface IIPResponse {
+    query: string
+    status: "success" | "fail"
+    isp: string
+    org: string
+    as: string
 }
 
 async function isCloudlare(target: String): Promise<Boolean> {
@@ -18,6 +25,18 @@ async function isCloudlare(target: String): Promise<Boolean> {
             return error.response?.headers["cf-ray"] !== undefined
         }
         return false
+    }
+}
+
+async function lookupIp(ip: string): Promise<IIPResponse | null> {
+    try {
+        const response: AxiosResponse = await axios.get(
+            `http://ip-api.com/json/${ip}?fields=status,org,query`
+        )
+        return response.data
+    } catch (error) {
+        pino.error("IP lookup failed:", error)
+        return null
     }
 }
 
@@ -49,6 +68,7 @@ export async function scanTargetHandler(
             const data = ParsedData.nmaprun
 
             const cloudflare: Boolean = await isCloudlare(data.hosthint.address.addr)
+            const ipInfo: IIPResponse | null = await lookupIp(data.hosthint.address.addr)
 
             return reply.send({
                 success: true,
@@ -56,6 +76,7 @@ export async function scanTargetHandler(
                 data: {
                     data,
                     cloudflare,
+                    ipinfo: ipInfo
                 },
             })
         } catch (e) {
