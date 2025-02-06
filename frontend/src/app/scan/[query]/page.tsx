@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { JSX, useState } from "react";
 import {
   FaArrowLeft,
   FaChevronLeft,
@@ -16,9 +16,15 @@ import {
   FaPortrait,
   FaPlug,
   FaCloudflare,
+  FaQuestionCircle,
+  FaAws,
+  FaGoogle,
+  FaMicrosoft,
+  FaDigitalOcean,
 } from "react-icons/fa";
 import { BiSolidError } from "react-icons/bi";
 import { FiExternalLink } from "react-icons/fi";
+import { CgVercel } from "react-icons/cg";
 
 async function scanTarget(target: string) {
   const response = await fetch("/api/v1/scan", {
@@ -142,6 +148,32 @@ export default function ScanPage() {
     );
   }
 
+  const iconMap: Record<string, JSX.Element> = {
+    vercel: <CgVercel className="w-6 h-6" />,
+    aws: <FaAws className="w-6 h-6" />,
+    "Google LLC": <FaGoogle className="w-6 h-6" />,
+    azure: <FaMicrosoft className="w-6 h-6" />,
+    digitalocean: <FaDigitalOcean className="w-6 h-6" />,
+    default: <FaQuestionCircle className="w-6 h-6" />,
+  };
+
+  const gradientMap: Record<string, string> = {
+    vercel: "from-black to-gray-900",
+    aws: "from-orange-600 to-amber-900",
+    "google cloud": "from-blue-500 to-blue-700",
+    azure: "from-sky-600 to-blue-800",
+    digitalocean: "from-blue-400 to-blue-600",
+    default: "from-gray-600 to-gray-800",
+  };
+
+  const getHostingProvider = (org: string): string => {
+    const normalizedOrg = org.toLowerCase();
+    const provider = Object.keys(gradientMap).find(
+      (key) => key !== "default" && normalizedOrg.includes(key)
+    );
+    return provider || "default";
+  };
+
   const scanData = data?.data.data;
   const isCloudflare = data.data.cloudflare;
   const openPorts = Array.isArray(scanData?.host?.ports?.port)
@@ -164,6 +196,8 @@ export default function ScanPage() {
     osMatches.length > 0
       ? osMatches.sort((a: any, b: any) => b.accuracy - a.accuracy)[0]
       : null;
+
+  const ipInfo = data.data.ipinfo;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
@@ -193,11 +227,11 @@ export default function ScanPage() {
           </motion.button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12 auto-cols-auto grid-flow-row">
           <InfoCard
             title="Status"
             value={
-              scanData?.host?.status?.state.toUpperCase() as string | "Unkown"
+              scanData?.host?.status?.state.toUpperCase() as string | "Unknown"
             }
             gradient="from-blue-500 to-blue-600"
             icon={<FaInfoCircle className="w-5 h-5" />}
@@ -213,7 +247,7 @@ export default function ScanPage() {
             value={
               scanData?.host?.address?.addrtype?.toUpperCase() as
                 | string
-                | "Unkown"
+                | "Unknown"
             }
             gradient="from-pink-500 to-pink-600"
             icon={<FaNetworkWired className="w-5 h-5" />}
@@ -240,10 +274,34 @@ export default function ScanPage() {
             value={
               `${scanData?.runstats?.finished?.elapsed}s` as string | "N/A"
             }
-            gradient="from-orange-500 to-orange-600"
+            gradient="from-green-500 to-green-600"
             icon={<FaClock className="w-5 h-5" />}
           />
-          {isCloudflare ? <CloudflareInfoCard target={scanData?.host?.hostnames?.hostname?.name} /> : <></>}
+
+          {isCloudflare && ipInfo ? (
+            <>
+              <CloudflareInfoCard
+                target={scanData?.host?.hostnames?.hostname?.name}
+                className="col-span-2"
+              />
+              <HostCard
+                title="Hosting Provider"
+                subvalue="Detected via IP-Info"
+                ipinfo={ipInfo}
+              />
+            </>
+          ) : ipInfo ? (
+            <HostCard
+              title="Hosting Provider"
+              subvalue="Detection via IP-Info"
+              ipinfo={ipInfo}
+              className="col-span-full"
+            />
+          ) : isCloudflare ? (
+            <CloudflareInfoCard
+              target={scanData?.host?.hostnames?.hostname?.name}
+            />
+          ) : null}
         </div>
 
         <motion.div
@@ -345,6 +403,44 @@ export default function ScanPage() {
       </motion.div>
     );
   }
+
+  function HostCard({
+    title,
+    subvalue,
+    ipinfo,
+    className,
+  }: {
+    title: string;
+    subvalue?: string;
+    ipinfo: any;
+    className?: string;
+  }) {
+    const provider: string = getHostingProvider(ipinfo?.org || "");
+    const gradient = gradientMap[provider] ?? gradientMap.default;
+    const icon = iconMap[provider] ?? iconMap.default;
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className={`bg-gradient-to-br ${gradient} ${className} p-5 rounded-xl shadow-lg relative`}
+      >
+        <div className="flex items-center justify-between gap-3 mb-2">
+          <div className="flex items-center gap-3">
+            {icon}
+            <h3 className="text-sm text-gray-200">{title}</h3>
+          </div>
+        </div>
+        <p className="text-xl font-semibold mb-1">
+          {ipinfo?.org || "Unknown provider"}
+        </p>
+
+        <div className="mt-2 text-xs text-gray-400">
+          {subvalue && <p>{subvalue}</p>}
+        </div>
+      </motion.div>
+    );
+  }
   function PortCard({ port, index }: { port: any; index: number }) {
     return (
       <motion.div
@@ -365,12 +461,18 @@ export default function ScanPage() {
       </motion.div>
     );
   }
-  function CloudflareInfoCard({ target }: { target: string }) {
+  function CloudflareInfoCard({
+    target,
+    className,
+  }: {
+    target: string;
+    className?: string;
+  }) {
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-br from-orange-400 col-span-full via-orange-500 to-orange-600 py-5 pl-5 rounded-xl shadow-lg relative overflow-hidden"
+        className={`bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600 py-5 pl-5 rounded-xl shadow-lg relative overflow-hidden ${className}`}
       >
         <div className="flex items-center justify-between gap-3 mb-2 relative">
           <div className="flex items-center gap-3 z-10">
