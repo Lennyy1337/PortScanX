@@ -486,7 +486,7 @@ export default function ScanPage() {
             transition={{ delay: 0.2 }}
             onClick={() =>
               window.open(
-                `https://search.censys.io/search?resource=hosts&sort=RELEVANCE&per_page=25&virtual_hosts=INCLUDE&q=${encodeURIComponent(
+                `https://search.censys.io/search?resource=hosts&sort=RELEVANCE&per_page=25&virtual_hosts=EXCLUDE&q=${encodeURIComponent(
                   target
                 )}`,
                 "_blank"
