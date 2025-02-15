@@ -61,7 +61,6 @@ export async function scanTargetHandler(
             const ParsedData = JSON.parse(results as any)
             const data = ParsedData.nmaprun
 
-            let cloudflare: boolean = await isCloudlare(request.body.target)
             let ipInfo: IIPResponse | null = await lookupIp(request.body.target)
 
             return reply.send({
@@ -69,7 +68,7 @@ export async function scanTargetHandler(
                 message: "Target scanned!",
                 data: {
                     data,
-                    cloudflare,
+                    cloudflare: ipInfo?.org.toLowerCase().includes("cloudflare"),
                     ipinfo: ipInfo,
                 },
             })
