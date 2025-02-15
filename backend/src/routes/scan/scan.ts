@@ -66,9 +66,19 @@ export async function scanTargetHandler(
 
             const ParsedData = JSON.parse(results as any)
             const data = ParsedData.nmaprun
+            let cloudflare: Boolean = false
+            let ipInfo: IIPResponse | null = {
+                query: request.body.target,
+                status: "success",
+                as: "unkown",
+                isp: "unkown",
+                org: "unkown"
+            }
 
-            const cloudflare: Boolean = await isCloudlare(data.hosthint.address.addr)
-            const ipInfo: IIPResponse | null = await lookupIp(data.hosthint.address.addr)
+            if(data.hosthint.address.addr){
+                cloudflare = await isCloudlare(data.hosthint.address.addr)
+                ipInfo  = await lookupIp(data.hosthint.address.addr)
+            }
 
             return reply.send({
                 success: true,
