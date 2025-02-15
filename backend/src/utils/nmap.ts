@@ -45,7 +45,9 @@ class NmapScanner extends EventEmitter {
     args.push('-sS', '-sU');
 
     args.push('--top-ports', '1000');
-  
+    
+    args.push("-Pn")
+
     if (options.osDetection) {
       args.push('-O');
     }
